@@ -110,6 +110,8 @@ pytest
 ```
 Tüm 12 testin de başarıyla geçtiğini göreceksiniz.
 
+## Proje Dosya Yapısı
+
 ```
 ├── tests/
 │   ├── conftest.py         # Paylaşılan Pytest fixture'ları
