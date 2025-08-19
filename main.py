@@ -14,11 +14,8 @@ def main_menu():
         choice = input("Seçiminizi yapın (1-5): ")
 
         if choice == '1':
-            title = input("Kitap başlığı: ")
-            author = input("Yazar: ")
-            isbn = input("ISBN: ")
-            new_book = Book(title, author, isbn)
-            lib.add_book(new_book)
+            isbn = input("Eklemek istediğiniz kitabın ISBN'ini girin: ")
+            lib.add_book_from_api(isbn)
         
         elif choice == '2':
             isbn = input("Silmek istediğiniz kitabın ISBN'ini girin: ")

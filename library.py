@@ -1,4 +1,5 @@
 import json
+import httpx
 
 class Book:
     """
@@ -36,10 +37,39 @@ class Library:
         with open(self.filename, 'w') as f:
             json.dump([book.to_dict() for book in self.books], f, indent=4)
 
-    def add_book(self, book):
+    def add_book_object(self, book: Book):
         self.books.append(book)
         self._save_books()
         print(f"Başarıyla eklendi: {book}")
+
+    def add_book_from_api(self, isbn: str):
+        api_url = f"https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}&format=json&jscmd=data"
+        
+        try:
+            response = httpx.get(api_url)
+            response.raise_for_status() 
+            data = response.json()
+            
+            book_key = f"ISBN:{isbn}"
+            if book_key not in data:
+                print(f"Hata: {isbn} ISBN ile kitap bulunamadı.")
+                return None
+
+            book_data = data[book_key]
+            title = book_data.get("title", "Başlık Bilgisi Yok")
+            authors = book_data.get("authors", [])
+            author_name = authors[0]['name'] if authors else "Yazar Bilgisi Yok"
+
+            new_book = Book(title, author_name, isbn)
+            
+            # Burada diğer basit metodu çağırıyoruz.
+            self.add_book_object(new_book)
+            return new_book
+
+        except (httpx.HTTPStatusError, httpx.RequestError, KeyError, IndexError) as e:
+            print(f"Kitap eklenirken bir hata oluştu: {e}")
+            return None
+
 
     def remove_book(self, isbn):
         book_to_remove = self.find_book(isbn)
