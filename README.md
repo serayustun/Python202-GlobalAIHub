@@ -26,6 +26,26 @@ Proje, Nesne Yönelimli Programlama (OOP), API entegrasyonu, veri kalıcılığ�
 *   **Test:** pytest, pytest-mock
 *   **Versiyon Kontrolü:** Git & GitHub
 
+## Tasarım Tercihleri ve Teknik Gerekçeler
+
+Bu projede, belirli sorunları çözmek ve modern geliştirme pratiklerini uygulamak için bilinçli teknoloji ve desen tercihleri yapılmıştır.
+
+*   **Neden `conftest.py`?**
+    > **Sorun:** Testlerimizin (`test_stage1.py`, `test_stage2.py` vb.) birçoğunun, her testten önce temiz bir `Library` nesnesi oluşturması gerekiyordu. Bu hazırlık kodunu her test dosyasına kopyalamak, kod tekrarına yol açacak ve bakımı zorlaştıracaktı (DRY - Don't Repeat Yourself prensibinin ihlali).
+    > **Çözüm:** `pytest`'in sihirli dosyası olan `conftest.py`'yi kullandık. Bu dosyada tanımlanan `fixture`'lar (`temp_library` gibi), `tests/` klasöründeki tüm test dosyaları tarafından otomatik olarak tanınır ve paylaşılır. Bu sayede, test hazırlık kodumuzu merkezi, yeniden kullanılabilir ve temiz bir yapıda tuttuk.
+
+*   **Neden `pytest.ini`?**
+    > **Sorun:** `pytest` komutu, `tests/` klasörünün içindeki bir test dosyasını çalıştırdığında, bu test dosyası bir üst dizindeki `library.py` modülünü bulamadığı için `ModuleNotFoundError` hatası alıyorduk.
+    > **Çözüm:** Projenin kök dizinine, `pythonpath = .` direktifini içeren bir `pytest.ini` dosyası ekledik. Bu, `pytest`'e testleri çalıştırmadan önce projenin kök dizinini (`.`) Python'un modül arama yoluna eklemesini söyler. Bu sayede testlerimiz, projenin neresinde olurlarsa olsunlar, `library` gibi ana modüllere sorunsuzca erişebilirler.
+
+*   **Neden Mocking (`pytest-mock`)?**
+    > **Sorun:** API entegrasyonunu test ederken, testlerimizin her seferinde gerçek Open Library API'sine bağlanmasını istemedik. Bu, testleri yavaşlatır, internet bağlantısına bağımlı hale getirir ve dış servisin anlık durumuna göre başarısız olmalarına neden olabilirdi.
+    > **Çözüm:** `pytest-mock` kütüphanesi ile `httpx.get` fonksiyonunu "taklit ettik" (mocking). Test sırasında gerçek bir ağ isteği yapmak yerine, fonksiyonun bizim önceden tanımladığımız sahte bir cevabı (başarılı veya hatalı) anında döndürmesini sağladık. Bu, testlerimizi hızlı, güvenilir ve tekrarlanabilir hale getirdi.
+
+*   **Neden FastAPI ve Pydantic?**
+    > **Sorun:** Kütüphane mantığımızı bir web servisi olarak sunarken, gelen isteklerin doğru formatta olduğundan emin olmalı ve API'nin nasıl kullanılacağını açıkça belgelemeliydik.
+    > **Çözüm:** Yüksek performansı, modern yapısı ve harika geliştirici deneyimi için FastAPI'yi tercih ettik. Pydantic modelleri (`BookModel`, `ISBNModel`) kullanarak API'mizin beklediği veri yapılarını katı bir şekilde tanımladık. FastAPI, bu modelleri kullanarak otomatik olarak gelen verileri doğrular, hatalı istekleri reddeder ve en önemlisi `/docs` altında interaktif bir API dokümantasyonu oluşturur. Bu, daha az kodla daha güvenli ve daha iyi belgelenmiş bir API yazmamızı sağladı.
+
 ## Kurulum
 
 Projeyi yerel makinenizde çalıştırmak için aşağıdaki adımları izleyin.
